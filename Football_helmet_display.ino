@@ -17,12 +17,14 @@ void setup() {
   pinMode(18, OUTPUT);
   pinMode(19, OUTPUT);
   pinMode(20, OUTPUT);
-  pinMode(21, OUTPUT);  
+  pinMode(21, OUTPUT);
+  pinMode(22, OUTPUT);
+  pinMode(23, OUTPUT);  
 
   digitalWrite(21, HIGH);
 
-  byte numDigits = 1;   
-  byte digitPins[] = {21};
+  byte numDigits = 3;   
+  byte digitPins[] = {23, 22, 21};
   byte segmentPins[] = {19, 20, 15, 14, 13, 18, 17, 16};
   bool resistorsOnSegments = true; // 'false' means resistors are on digit pins
   byte hardwareConfig = N_TRANSISTORS; // See README.md for options
@@ -32,19 +34,20 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
-  int i = 0;
-  for (i = 0; i < 10; i++){
-    sevseg.setNumber(i,0);
-    sevseg.refreshDisplay();
-    delay(100);
-  }
-  for (i = 0; i < 10; i++){
-    sevseg.setNumber(i,1);
-    sevseg.refreshDisplay();
-    delay(100);
-  }  
-
+  static unsigned long timer = millis();
+  static int deciSeconds = 0;
   
+  if (millis() - timer >= 100) {
+    timer += 100;
+    deciSeconds++; // 100 milliSeconds is equal to 1 deciSecond
+    
+    if (deciSeconds == 1000) { // Reset to 0 after counting for 1000 seconds.
+      deciSeconds=0;
+    }
+    sevseg.setNumber(deciSeconds, 1);
+  }
+
+  sevseg.refreshDisplay(); // Must run repeatedly
 }
 
 void one(){
