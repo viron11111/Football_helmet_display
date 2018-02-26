@@ -1,31 +1,49 @@
-//       19
-//   18       20
-//       17
-//   13       15
-//       14       16
+//       5
+//   6       4
+//       7
+//   11       9
+//       10       8
 
 #include "SevSeg.h"
 SevSeg sevseg; //Instantiate a seven segment object
+
+int val = 0;
+float cm = 0;
  
 void setup() {                
   // initialize the digital pin as an output.
-  pinMode(13, OUTPUT);  
-  pinMode(14, OUTPUT);
-  pinMode(15, OUTPUT);
-  pinMode(16, OUTPUT);
-  pinMode(17, OUTPUT);
-  pinMode(18, OUTPUT);
-  pinMode(19, OUTPUT);
-  pinMode(20, OUTPUT);
-  pinMode(21, OUTPUT);
-  pinMode(22, OUTPUT);
-  pinMode(23, OUTPUT);  
+  pinMode(0, OUTPUT);  
+  pinMode(1, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+  pinMode(10, OUTPUT);  
+  pinMode(11, OUTPUT);  
+  
+  pinMode(22, OUTPUT); 
 
-  digitalWrite(21, HIGH);
+  Serial.begin(9600);
 
-  byte numDigits = 3;   
-  byte digitPins[] = {23, 22, 21};
-  byte segmentPins[] = {19, 20, 15, 14, 13, 18, 17, 16};
+  /*for (int i = 0; i < 50; i++){
+    digitalWrite(22, HIGH);
+    delay(200);
+    digitalWrite(22, LOW);
+    delay(200);
+  }*/
+  
+
+  //digitalWrite(0, HIGH);
+  //digitalWrite(10, HIGH);
+  //delay(3000);
+
+  byte numDigits = 4;   
+  byte digitPins[] = {3, 2, 1, 0};
+  byte segmentPins[] = {5, 4, 9, 10, 11, 6, 7, 8};
   bool resistorsOnSegments = true; // 'false' means resistors are on digit pins
   byte hardwareConfig = N_TRANSISTORS; // See README.md for options
   sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);
@@ -36,15 +54,27 @@ void setup() {
 void loop() {
   static unsigned long timer = millis();
   static int deciSeconds = 0;
+
+  val = analogRead(7);     // read the input pin 
+  val = val/2;
+  cm = val * 2.54;
+  //Serial.println(val);
+  if (cm <= 50){
+    digitalWrite(22,HIGH);
+  }
+  else{
+    digitalWrite(22,LOW);
+  }
+  //delay(50);
   
   if (millis() - timer >= 100) {
     timer += 100;
     deciSeconds++; // 100 milliSeconds is equal to 1 deciSecond
     
-    if (deciSeconds == 1000) { // Reset to 0 after counting for 1000 seconds.
+    if (deciSeconds == 10000) { // Reset to 0 after counting for 1000 seconds.
       deciSeconds=0;
     }
-    sevseg.setNumber(deciSeconds, 1);
+    sevseg.setNumber(cm, 1);
   }
 
   sevseg.refreshDisplay(); // Must run repeatedly
@@ -156,3 +186,4 @@ void decimal(){
 void no_decimal(){
   digitalWrite(16, LOW);
 }
+
