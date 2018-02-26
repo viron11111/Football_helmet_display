@@ -124,13 +124,13 @@ void loop() {
   else if (display_timer <= millis() && state == 3){
     state = 0;
   }
-  else if (too_long_timer <= millis() && state != 0 && state != 4){
+  /*else if (too_long_timer <= millis() && state != 0 && state != 4){
     state = 4;
     clutch_timer = millis() + clutch_length;
   }
   else if ((clutch_timer <= millis() || cm <= 50)&& state == 4){
     state = 0;
-  }
+  }*/
  
   /*if (clutch_timer > millis()){
     state = 1;
