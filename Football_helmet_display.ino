@@ -30,14 +30,22 @@ bool blinker = 0;
 int break_beam = 0;
 long beam_timer = 0;
 
+long delay_timer = 0;
+int delay_length = 50;  //delay amount to ensure helmet has hit before displaying value
+
 int randNumber;
 
 long display_timer = 0;
 int display_length = 5000;
 
 long too_long_timer = 0;
-int too_long_length = 10000;
+int too_long_length = 90000;
+int helmet_raised_for_too_long_length = 90000;
+long helmet_raised_length_timer = 0;
 bool sonar_state = 0;
+
+int helmet_array[10];  //taking average value during init
+float helmet_distance; //value used
  
 void setup() {      
   randomSeed(analogRead(0));          
@@ -63,14 +71,31 @@ void setup() {
   Serial.begin(115200);
 
   digitalWrite(12, HIGH);
-  delay(1000);
+  delay(2000);
 
-  /*for (int i = 0; i < 50; i++){
-    digitalWrite(22, HIGH);
-    delay(200);
-    digitalWrite(22, LOW);
-    delay(200);
-  }*/
+  for (int i = 0; i < 10; i++){
+    helmet_array[i] = analogRead(7);     // read the input pin
+    delay(5);
+  }
+
+  int sumer = 0;
+
+  for (int i = 0; i < 10; i = i + 1) {
+    sumer = sumer + helmet_array[i];
+    //Serial.println(helmet_array[i]);
+  }
+
+  helmet_distance = sumer / 10;
+  
+  Serial.println(helmet_distance);
+
+  helmet_distance = helmet_distance + 6;
+
+  if (helmet_distance > 70) helmet_distance = 70;
+  
+  Serial.println(helmet_distance);
+  //delay(000);
+  
   
 
   //digitalWrite(0, HIGH);
@@ -84,6 +109,7 @@ void setup() {
   byte hardwareConfig = N_TRANSISTORS; // See README.md for options
   sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);
   sevseg.setBrightness(100);
+  too_long_timer = millis() + too_long_length;
 }
 
 // the loop routine runs over and over again forever:
@@ -97,25 +123,41 @@ void loop() {
 
   
   val = analogRead(7);     // read the input pin 
-  val = val/2;
-  cm = ((val * 2.54) + cm_old1 + cm_old2 + cm_old3)/4.0;
+  //val = val/2;
+  cm = (val + cm_old1 + cm_old2 + cm_old3)/4.0;
 
   button_state = digitalRead(23);
 
   break_beam = analogRead(6);
-  //Serial.println(break_beam);
+
+  //reset counter for determining if helmet has been left inbetween break beam and bottom
+  if (state == 0 && cm <= (helmet_distance)){
+    helmet_raised_length_timer = millis() + helmet_raised_for_too_long_length;
+  }
+  
    
-  if (break_beam >= 200 && state == 0){
+  if (break_beam >= 1000 && state == 0){
     too_long_timer = millis() + too_long_length;
+    helmet_raised_length_timer = millis() + helmet_raised_for_too_long_length;
     state = 1;
+  }
+  else if (helmet_raised_length_timer <= millis() && state == 0){
+    state = 4;
+    clutch_timer = millis() + clutch_length;
   }
   else if (button_state == 0 && state == 1){
     too_long_timer = millis() + too_long_length;
+    helmet_raised_length_timer = millis() + helmet_raised_for_too_long_length;
     state = 2;
     clutch_timer = millis() + clutch_length;
   }
-  else if ((clutch_timer <= millis() || cm <= 50)&& state == 2){
+  else if ((clutch_timer <= millis() || cm <= helmet_distance) && state == 2){
+    delay_timer = millis() + delay_length;
+    state = 5;
+  }
+  else if (delay_timer <= millis() && state == 5){
     too_long_timer = millis() + too_long_length;
+    helmet_raised_length_timer = millis() + helmet_raised_for_too_long_length;
     randNumber = random(400, 3000);
     sevseg.setNumber(randNumber,0);
     display_timer = millis() + display_length;
@@ -124,13 +166,14 @@ void loop() {
   else if (display_timer <= millis() && state == 3){
     state = 0;
   }
-  /*else if (too_long_timer <= millis() && state != 0 && state != 4){
+  else if (too_long_timer <= millis() && state != 0 && state != 4){
     state = 4;
     clutch_timer = millis() + clutch_length;
   }
-  else if ((clutch_timer <= millis() || cm <= 50)&& state == 4){
+  else if (clutch_timer <= millis() && state == 4){
     state = 0;
-  }*/
+    too_long_timer = millis() + too_long_length;
+  }
  
   /*if (clutch_timer > millis()){
     state = 1;
@@ -177,9 +220,13 @@ void loop() {
        digitalWrite(22, HIGH);
        digitalWrite(12, HIGH);
     }  
+    else if (state == 5){
+       digitalWrite(22, HIGH);
+       digitalWrite(12, HIGH);
+    }      
     else if (state == 3){
        digitalWrite(22, LOW);
-       digitalWrite(12, LOW);
+       digitalWrite(12, HIGH);
     }
     else if (state == 4){
       sevseg.setChars("rest");
