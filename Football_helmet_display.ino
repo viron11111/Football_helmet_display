@@ -129,6 +129,8 @@ void loop() {
   button_state = digitalRead(23);
 
   break_beam = analogRead(6);
+  //Serial.print("break: ");
+  //Serial.println(break_beam);
 
   //reset counter for determining if helmet has been left inbetween break beam and bottom
   if (state == 0 && cm <= (helmet_distance)){
@@ -158,7 +160,7 @@ void loop() {
   else if (delay_timer <= millis() && state == 5){
     too_long_timer = millis() + too_long_length;
     helmet_raised_length_timer = millis() + helmet_raised_for_too_long_length;
-    randNumber = random(400, 3000);
+    randNumber = random(180, 220);
     sevseg.setNumber(randNumber,0);
     display_timer = millis() + display_length;
     state = 3;
