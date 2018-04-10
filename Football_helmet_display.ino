@@ -89,7 +89,7 @@ void setup() {
   
   Serial.println(helmet_distance);
 
-  helmet_distance = helmet_distance + 6;
+  helmet_distance = helmet_distance + 15;
 
   if (helmet_distance > 70) helmet_distance = 70;
   
@@ -114,6 +114,7 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
+  delay(5);
   static unsigned long timer = millis();
   static int deciSeconds = 0;
 
@@ -122,7 +123,7 @@ void loop() {
   cm_old1 = cm;
 
   
-  val = analogRead(7);     // read the input pin 
+  val = analogRead(7);     // read the SONAR
   //val = val/2;
   cm = (val + cm_old1 + cm_old2 + cm_old3)/4.0;
 
@@ -136,9 +137,11 @@ void loop() {
   if (state == 0 && cm <= (helmet_distance)){
     helmet_raised_length_timer = millis() + helmet_raised_for_too_long_length;
   }
-  
+
+  //Serial.print ("Break: ");
+  //Serial.println(break_beam);
    
-  if (break_beam >= 1000 && state == 0){
+  if (break_beam >= 950 && state == 0){
     too_long_timer = millis() + too_long_length;
     helmet_raised_length_timer = millis() + helmet_raised_for_too_long_length;
     state = 1;
@@ -160,7 +163,7 @@ void loop() {
   else if (delay_timer <= millis() && state == 5){
     too_long_timer = millis() + too_long_length;
     helmet_raised_length_timer = millis() + helmet_raised_for_too_long_length;
-    randNumber = random(180, 220);
+    randNumber = random(2580, 2621);
     sevseg.setNumber(randNumber,0);
     display_timer = millis() + display_length;
     state = 3;
