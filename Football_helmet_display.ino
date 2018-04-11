@@ -8,6 +8,10 @@
 // state 1 : helmet at top, button illuminated, no display
 // state 2 : helmet hits, display value for temporary time then return to state 0
 
+//Severity Index
+//2580-2630
+//850-890
+//180-220
 
 #include "SevSeg.h"
 SevSeg sevseg; //Instantiate a seven segment object
@@ -163,7 +167,7 @@ void loop() {
   else if (delay_timer <= millis() && state == 5){
     too_long_timer = millis() + too_long_length;
     helmet_raised_length_timer = millis() + helmet_raised_for_too_long_length;
-    randNumber = random(2580, 2621);
+    randNumber = random(180, 221);
     sevseg.setNumber(randNumber,0);
     display_timer = millis() + display_length;
     state = 3;
